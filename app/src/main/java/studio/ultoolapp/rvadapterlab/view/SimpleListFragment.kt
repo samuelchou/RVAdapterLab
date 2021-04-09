@@ -1,12 +1,14 @@
 package studio.ultoolapp.rvadapterlab.view
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import studio.ultoolapp.rvadapterlab.R
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import eu.davidea.flexibleadapter.FlexibleAdapter
 import studio.ultoolapp.rvadapterlab.databinding.FragmentSimpleListBinding
+import studio.ultoolapp.rvadapterlab.view.component.SimpleListItem
 
 class SimpleListFragment : Fragment() {
 
@@ -19,8 +21,25 @@ class SimpleListFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentSimpleListBinding.inflate(inflater, container, false)
 
-        binding.textView.text = "Hello Data-Binding Text."
         return binding.root
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val mDataList = getDummyItemList(30)
+        val mAdapter = FlexibleAdapter(mDataList)
+
+        binding.itemListRecycler.apply {
+            layoutManager =
+                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            adapter = mAdapter
+        }
+    }
+
+    private fun getDummyItemList(amount: Int): List<SimpleListItem> =
+        mutableListOf<SimpleListItem>().apply {
+            for (i in 0..amount) add(SimpleListItem("id $i", "title $i"))
+        }
 
 }

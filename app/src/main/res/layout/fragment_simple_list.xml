@@ -7,11 +7,12 @@
         android:layout_height="match_parent"
         tools:context=".view.SimpleListFragment">
 
-        <TextView
-            android:id="@+id/textView"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/itemListRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Hello Fragment" />
+            tools:itemCount="15"
+            tools:listitem="@layout/item_simple_style" />
 
     </FrameLayout>
 </layout>
