@@ -77,8 +77,8 @@ class SimpleListItem(private val id: String, private val title: String) :
      */
     inner class SimpleItemViewHolder(view: View, adapter: FlexibleAdapter<*>?) :
         FlexibleViewHolder(view, adapter) {
-        // TODO: 2021/4/9 improve: change to data binding.
-        val titleText = view.findViewById<TextView>(R.id.itemTitle)!!
-        val subtitleText = view.findViewById<TextView>(R.id.itemSubTitle)!!
+        val binding: ItemSimpleStyleBinding = ItemSimpleStyleBinding.bind(view)
+        val titleText: TextView = binding.itemTitle
+        val subtitleText: TextView = binding.itemSubTitle
     }
 }
