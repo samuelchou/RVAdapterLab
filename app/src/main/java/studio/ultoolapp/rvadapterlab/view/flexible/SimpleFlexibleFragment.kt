@@ -1,4 +1,4 @@
-package studio.ultoolapp.rvadapterlab.view
+package studio.ultoolapp.rvadapterlab.view.flexible
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,9 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import studio.ultoolapp.rvadapterlab.databinding.FragmentSimpleListBinding
 import studio.ultoolapp.rvadapterlab.metadata.SimpleItem
-import studio.ultoolapp.rvadapterlab.view.flexible.SimpleFlexibleItem
 
-class SimpleListFragment : Fragment() {
+class SimpleFlexibleFragment : Fragment() {
 
     private lateinit var binding: FragmentSimpleListBinding
 

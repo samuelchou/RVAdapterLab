@@ -1,4 +1,4 @@
-package studio.ultoolapp.rvadapterlab.view
+package studio.ultoolapp.rvadapterlab.view.flexible
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import studio.ultoolapp.rvadapterlab.databinding.FragmentHeaderListBinding
 
-class HeaderListFragment : Fragment() {
+class HeaderFlexibleFragment : Fragment() {
 
     private lateinit var binding: FragmentHeaderListBinding
 
