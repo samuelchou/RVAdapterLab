@@ -4,6 +4,10 @@ plugins {
     id 'kotlin-kapt'
 }
 
+kapt {
+    correctErrorTypes = true // recommendations from Epoxy
+}
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
@@ -50,6 +54,11 @@ dependencies {
     implementation 'eu.davidea:flexible-adapter-ui:1.0.0'
     implementation 'eu.davidea:flexible-adapter-livedata:1.0.0-b3'
     implementation 'eu.davidea:flexible-adapter-databinding:1.0.0'
+
+    // Epoxy Series
+    implementation "com.airbnb.android:epoxy:$epoxyVersion"
+    kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
+    implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
