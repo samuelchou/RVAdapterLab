@@ -1,16 +1,16 @@
 package studio.ultoolapp.rvadapterlab.view.component
 
 import android.view.View
-import android.widget.TextView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import studio.ultoolapp.rvadapterlab.R
 import studio.ultoolapp.rvadapterlab.databinding.ItemSimpleStyleBinding
+import studio.ultoolapp.rvadapterlab.metadata.SimpleItem
 
 
-class SimpleListItem(private val id: String, private val title: String) :
+class SimpleListItem(private val item: SimpleItem) :
     AbstractFlexibleItem<SimpleListItem.SimpleItemViewHolder>() {
 
     /**
@@ -21,7 +21,7 @@ class SimpleListItem(private val id: String, private val title: String) :
      */
     override fun equals(inObject: Any?): Boolean {
         if (inObject is SimpleListItem) {
-            return id == inObject.id
+            return item == inObject.item
         }
         return false
     }
@@ -35,7 +35,7 @@ class SimpleListItem(private val id: String, private val title: String) :
      * of the animations also if notifyDataSetChanged() is invoked.
      */
     override fun hashCode(): Int {
-        return id.hashCode()
+        return item.hashCode()
     }
 
     /**
@@ -65,9 +65,8 @@ class SimpleListItem(private val id: String, private val title: String) :
         position: Int,
         payloads: List<Any>
     ) {
-        holder.titleText.text = title
-        // Title appears disabled if item is disabled
-        holder.titleText.isEnabled = isEnabled
+        holder.binding.titleText = item.title
+        holder.binding.subtitleText = item.subtitle
     }
 
     /**
@@ -78,7 +77,5 @@ class SimpleListItem(private val id: String, private val title: String) :
     inner class SimpleItemViewHolder(view: View, adapter: FlexibleAdapter<*>?) :
         FlexibleViewHolder(view, adapter) {
         val binding: ItemSimpleStyleBinding = ItemSimpleStyleBinding.bind(view)
-        val titleText: TextView = binding.itemTitle
-        val subtitleText: TextView = binding.itemSubTitle
     }
 }

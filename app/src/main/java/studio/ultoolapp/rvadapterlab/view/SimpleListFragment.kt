@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import studio.ultoolapp.rvadapterlab.databinding.FragmentSimpleListBinding
+import studio.ultoolapp.rvadapterlab.metadata.SimpleItem
 import studio.ultoolapp.rvadapterlab.view.component.SimpleListItem
 
 class SimpleListFragment : Fragment() {
@@ -28,7 +29,7 @@ class SimpleListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val mDataList = getDummyItemList(30)
-        val mAdapter = FlexibleAdapter(mDataList)
+        val mAdapter = FlexibleAdapter(mDataList.map { SimpleListItem(it) })
 
         binding.itemListRecycler.apply {
             layoutManager =
@@ -37,9 +38,8 @@ class SimpleListFragment : Fragment() {
         }
     }
 
-    private fun getDummyItemList(amount: Int): List<SimpleListItem> =
-        mutableListOf<SimpleListItem>().apply {
-            for (i in 0..amount) add(SimpleListItem("id $i", "title $i"))
+    private fun getDummyItemList(amount: Int): List<SimpleItem> =
+        mutableListOf<SimpleItem>().apply {
+            for (i in 0..amount) add(SimpleItem("Title $i", "Subtitle $i"))
         }
-
 }
