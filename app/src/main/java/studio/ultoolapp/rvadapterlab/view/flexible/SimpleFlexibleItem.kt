@@ -1,4 +1,4 @@
-package studio.ultoolapp.rvadapterlab.view.component
+package studio.ultoolapp.rvadapterlab.view.flexible
 
 import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -10,8 +10,8 @@ import studio.ultoolapp.rvadapterlab.databinding.ItemSimpleStyleBinding
 import studio.ultoolapp.rvadapterlab.metadata.SimpleItem
 
 
-class SimpleListItem(private val item: SimpleItem) :
-    AbstractFlexibleItem<SimpleListItem.SimpleItemViewHolder>() {
+class SimpleFlexibleItem(private val item: SimpleItem) :
+    AbstractFlexibleItem<SimpleFlexibleItem.SimpleItemViewHolder>() {
 
     /**
      * When an item is equals to another?
@@ -19,9 +19,9 @@ class SimpleListItem(private val item: SimpleItem) :
      * default java implementation (return this == o;) if you don't have unique IDs!
      * This will be explained in the "Item interfaces" Wiki page.
      */
-    override fun equals(inObject: Any?): Boolean {
-        if (inObject is SimpleListItem) {
-            return item == inObject.item
+    override fun equals(other: Any?): Boolean {
+        if (other is SimpleFlexibleItem) {
+            return item == other.item
         }
         return false
     }
