@@ -7,12 +7,12 @@
         android:layout_height="match_parent"
         tools:context=".view.epoxy.HeaderEpoxyFragment">
 
-        <TextView
-            android:id="@+id/textView"
+        <com.airbnb.epoxy.EpoxyRecyclerView
+            android:id="@+id/itemListRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="YO" />
+            tools:itemCount="15"
+            tools:listitem="@layout/item_simple_style" />
 
     </FrameLayout>
 </layout>
