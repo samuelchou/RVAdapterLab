@@ -15,8 +15,8 @@ class HeaderFlexibleFragment : Fragment() {
     private lateinit var binding: FragmentHeaderListBinding
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentHeaderListBinding.inflate(inflater, container, false)
@@ -28,7 +28,16 @@ class HeaderFlexibleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val mDataList = getDummyItemList(30)
-        val mAdapter = FlexibleAdapter(mDataList.map { SimpleFlexibleItem(it) })
+        val mAdapter = FlexibleAdapter(mDataList.mapIndexed { index, simpleItem ->
+            if (index % 5 == 1) {
+                SimpleFlexibleHeader(simpleItem)
+            } else {
+                SimpleFlexibleItem(simpleItem)
+            }
+        })
+
+        mAdapter.setDisplayHeadersAtStartUp(true)
+                .setStickyHeaders(true) // BOTH has to be set true.
 
         binding.itemListRecycler.apply {
             layoutManager =
