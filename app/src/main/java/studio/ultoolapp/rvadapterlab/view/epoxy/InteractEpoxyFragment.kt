@@ -12,11 +12,14 @@ import studio.ultoolapp.rvadapterlab.R
 import studio.ultoolapp.rvadapterlab.databinding.FragmentInteractEpoxyBinding
 import studio.ultoolapp.rvadapterlab.metadata.DateAmountItem
 import studio.ultoolapp.rvadapterlab.metadata.toCurrencyFormat
-import studio.ultoolapp.rvadapterlab.metadata.toDayTitleString
+import studio.ultoolapp.rvadapterlab.metadata.toYMDPlainString
 import java.util.*
 
 class InteractEpoxyFragment : Fragment() {
     private lateinit var binding: FragmentInteractEpoxyBinding
+
+    private val itemLists = mutableListOf<DateAmountItem>()
+    private var listAdapter: InteractEpoxyItemAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,17 +32,13 @@ class InteractEpoxyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val itemLists = getDummyLists(100)
+        itemLists.addAll(getDummyLists(100))
 
         binding.itemListRecycler.layoutManager = StickyHeaderLinearLayoutManager(requireContext())
-        InteractEpoxyItemAdapter().apply {
+        listAdapter = InteractEpoxyItemAdapter().apply {
             itemClickListener = object : InteractEpoxyItemAdapter.OnItemClickListener {
                 override fun onItemClick(rootView: View, item: DateAmountItem, index: Int) {
-                    Toast.makeText(
-                        context,
-                        "click item ${item.amount.toCurrencyFormat()} / ${item.date.toDayTitleString()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    clickItem(rootView, item, index)
                 }
             }
 
@@ -51,6 +50,16 @@ class InteractEpoxyFragment : Fragment() {
             // TODO: 2021/5/19 do add operation here
             Snackbar.make(binding.root, R.string.action_add, Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    private fun clickItem(holderView: View, item: DateAmountItem, index: Int) {
+        Toast.makeText(
+            context,
+            "Removed item $index: ${item.amount.toCurrencyFormat()} at ${item.date.toYMDPlainString()}",
+            Toast.LENGTH_SHORT
+        ).show()
+        itemLists.remove(item)
+        listAdapter?.updateList(itemLists)
     }
 
     private fun getDummyLists(amount: Int): List<DateAmountItem> {
