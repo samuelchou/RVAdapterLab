@@ -2,6 +2,9 @@
     <string name="app_name">RVAdapterLab</string>
     <string name="tab_simple_list">Simple List</string>
     <string name="tab_header_list">List with headers</string>
+    <string name="tab_interactive_list">Interactive</string>
+
+    <string name="action_add">Add</string>
 
     <string name="title_flexible">Flexible Adapter</string>
     <string name="action_open_flexible">View List By Flexible</string>

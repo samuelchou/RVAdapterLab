@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".view.epoxy.HeaderEpoxyFragment">
+
+        <com.airbnb.epoxy.EpoxyRecyclerView
+            android:id="@+id/itemListRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:itemCount="15"
+            tools:listitem="@layout/item_simple_style" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="32dp"
+            android:clickable="true"
+            android:contentDescription="@string/action_add"
+            android:focusable="true"
+            app:srcCompat="@drawable/ic_add" />
+
+    </FrameLayout>
+</layout>
