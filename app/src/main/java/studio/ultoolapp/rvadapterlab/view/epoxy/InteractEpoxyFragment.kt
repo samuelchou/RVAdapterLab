@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.airbnb.epoxy.stickyheader.StickyHeaderLinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
-import studio.ultoolapp.rvadapterlab.R
 import studio.ultoolapp.rvadapterlab.databinding.FragmentInteractEpoxyBinding
 import studio.ultoolapp.rvadapterlab.metadata.DateAmountItem
 import studio.ultoolapp.rvadapterlab.metadata.toCurrencyFormat
@@ -20,6 +19,7 @@ class InteractEpoxyFragment : Fragment() {
 
     private val itemLists = mutableListOf<DateAmountItem>()
     private var listAdapter: InteractEpoxyItemAdapter? = null
+    private var secondsReversed = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,8 +47,26 @@ class InteractEpoxyFragment : Fragment() {
         }
 
         binding.btnAdd.setOnClickListener {
-            // TODO: 2021/5/19 do add operation here
-            Snackbar.make(binding.root, R.string.action_add, Snackbar.LENGTH_SHORT).show()
+            addItem().also {
+                Snackbar.make(
+                    binding.root,
+                    "Added item at ${it.date.toYMDPlainString()}",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun addItem(): DateAmountItem {
+        secondsReversed += 27351
+        return Calendar.getInstance().run {
+            add(Calendar.SECOND, -secondsReversed)
+            time
+        }.let { date ->
+            DateAmountItem(date, (secondsReversed.toDouble() / 2.12) % 324)
+        }.also {
+            itemLists.add(0, it)
+            listAdapter?.updateList(itemLists)
         }
     }
 
