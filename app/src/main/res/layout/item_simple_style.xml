@@ -13,12 +13,16 @@
             name="subtitleText"
             type="java.lang.String" />
 
+        <variable
+            name="clickListener"
+            type="android.view.View.OnClickListener" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:onClick="@{v -> clickListener.onClick(v)}"
         android:orientation="horizontal"
         android:padding="8dp">
 

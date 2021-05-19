@@ -1,6 +1,8 @@
 package studio.ultoolapp.rvadapterlab.view.epoxy
 
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import com.airbnb.epoxy.DataBindingEpoxyModel
 import com.airbnb.epoxy.EpoxyAdapter
 import com.airbnb.epoxy.stickyheader.StickyHeaderCallbacks
@@ -51,6 +53,13 @@ class InteractEpoxyItemAdapter : EpoxyAdapter(), StickyHeaderCallbacks {
             id("view holder $index")
             titleText(item.amount.toCurrencyFormat())
             subtitleText(item.date.toDetailedTimeString())
+            clickListener(View.OnClickListener {
+                Toast.makeText(
+                    it.context,
+                    "click item ${item.amount.toCurrencyFormat()} / ${item.date.toDayTitleString()}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            })
         }
     }
 
