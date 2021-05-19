@@ -2,7 +2,6 @@ package studio.ultoolapp.rvadapterlab.view.epoxy
 
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import com.airbnb.epoxy.DataBindingEpoxyModel
 import com.airbnb.epoxy.EpoxyAdapter
 import com.airbnb.epoxy.stickyheader.StickyHeaderCallbacks
@@ -19,6 +18,12 @@ class InteractEpoxyItemAdapter : EpoxyAdapter(), StickyHeaderCallbacks {
     init {
         enableDiffing()
     }
+
+    interface OnItemClickListener {
+        fun onItemClick(rootView: View, item: DateAmountItem, index: Int)
+    }
+
+    var itemClickListener: OnItemClickListener? = null
 
     fun updateList(list: List<DateAmountItem>) {
         removeAllModels()
@@ -47,18 +52,14 @@ class InteractEpoxyItemAdapter : EpoxyAdapter(), StickyHeaderCallbacks {
         }
     }
 
-    private fun DateAmountItem.dataToView(index: Int) = let { item ->
+    private fun DateAmountItem.dataToView(index: Int): DataBindingEpoxyModel = let { item ->
         SimpleStyleBindingModel_().apply {
             // only id and xml-defined properties can be called/set here.
             id("view holder $index")
             titleText(item.amount.toCurrencyFormat())
             subtitleText(item.date.toDetailedTimeString())
             clickListener(View.OnClickListener {
-                Toast.makeText(
-                    it.context,
-                    "click item ${item.amount.toCurrencyFormat()} / ${item.date.toDayTitleString()}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                itemClickListener?.onItemClick(it, item, index)
             })
         }
     }
