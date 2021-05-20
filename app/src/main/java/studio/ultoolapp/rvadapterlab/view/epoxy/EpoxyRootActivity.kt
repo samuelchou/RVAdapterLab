@@ -19,6 +19,7 @@ class EpoxyRootActivity : AppCompatActivity() {
             addFragment(HeaderEpoxyFragment(), getString(R.string.tab_header_list))
             addFragment(InteractEpoxyFragment(), getString(R.string.tab_interactive_list))
             addFragment(InteractGroupEpoxyFragment(), getString(R.string.tab_interactive_list_group))
+            addFragment(InteractControllerEpoxyFragment(), getString(R.string.tab_controller_epoxy))
             binding.viewPager.adapter = this
         }
         binding.tabLayout.setupWithViewPager(binding.viewPager)

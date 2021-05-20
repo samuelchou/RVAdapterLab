@@ -12,4 +12,5 @@
 
     <string name="title_epoxy">Epoxy Adapter</string>
     <string name="action_open_epoxy">View List By Epoxy</string>
+    <string name="tab_controller_epoxy">Controller Struct</string>
 </resources>
