@@ -3,6 +3,7 @@
     <string name="tab_simple_list">Simple List</string>
     <string name="tab_header_list">List with headers</string>
     <string name="tab_interactive_list">Interactive</string>
+    <string name="tab_interactive_list_group">Interactive by group</string>
 
     <string name="action_add">Add</string>
 
