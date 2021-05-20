@@ -18,7 +18,7 @@ class InteractGroupEpoxyFragment : Fragment() {
     private lateinit var binding: FragmentInteractEpoxyBinding
 
     private val itemLists = mutableListOf<DateAmountItem>()
-    private var listAdapter: InteractEpoxyItemAdapter? = null
+    private var listAdapter: InteractGroupEpoxyItemAdapter? = null
     private var secondsReversed = 0
 
     override fun onCreateView(
@@ -35,8 +35,8 @@ class InteractGroupEpoxyFragment : Fragment() {
         itemLists.addAll(getDummyLists(100))
 
         binding.itemListRecycler.layoutManager = StickyHeaderLinearLayoutManager(requireContext())
-        listAdapter = InteractEpoxyItemAdapter().apply {
-            itemClickListener = object : InteractEpoxyItemAdapter.OnItemClickListener {
+        listAdapter = InteractGroupEpoxyItemAdapter().apply {
+            itemClickListener = object : InteractGroupEpoxyItemAdapter.OnItemClickListener {
                 override fun onItemClick(rootView: View, item: DateAmountItem, index: Int) {
                     clickItem(rootView, item, index)
                 }
