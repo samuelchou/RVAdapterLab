@@ -18,7 +18,7 @@ class InteractControllerEpoxyFragment : Fragment() {
     private lateinit var binding: FragmentInteractEpoxyBinding
 
     private val itemLists = mutableListOf<DateAmountItem>()
-    private var listAdapter: InteractEpoxyItemAdapter? = null
+    private lateinit var epoxyController: InteractController
     private var secondsReversed = 0
 
     override fun onCreateView(
@@ -35,15 +35,15 @@ class InteractControllerEpoxyFragment : Fragment() {
         itemLists.addAll(getDummyLists(100))
 
         binding.itemListRecycler.layoutManager = StickyHeaderLinearLayoutManager(requireContext())
-        listAdapter = InteractEpoxyItemAdapter().apply {
-            itemClickListener = object : InteractEpoxyItemAdapter.OnItemClickListener {
+        epoxyController = InteractController().apply {
+            itemClickListener = object : InteractController.OnItemClickListener {
                 override fun onItemClick(rootView: View, item: DateAmountItem, index: Int) {
                     clickItem(rootView, item, index)
                 }
             }
 
-            binding.itemListRecycler.adapter = this
-            updateList(itemLists)
+            binding.itemListRecycler.setController(this)
+            setData(itemLists)
         }
 
         binding.btnAdd.setOnClickListener {
@@ -66,7 +66,7 @@ class InteractControllerEpoxyFragment : Fragment() {
             DateAmountItem(date, (secondsReversed.toDouble() / 2.12) % 324)
         }.also {
             itemLists.add(0, it)
-            listAdapter?.updateList(itemLists)
+            epoxyController.setData(itemLists)
         }
     }
 
@@ -77,7 +77,7 @@ class InteractControllerEpoxyFragment : Fragment() {
             Toast.LENGTH_SHORT
         ).show()
         itemLists.remove(item)
-        listAdapter?.updateList(itemLists)
+        epoxyController.setData(itemLists)
     }
 
     private fun getDummyLists(amount: Int): List<DateAmountItem> {
