@@ -4,13 +4,14 @@ import android.view.View
 import com.airbnb.epoxy.DataBindingEpoxyModel
 import com.airbnb.epoxy.GroupModel_
 import com.airbnb.epoxy.TypedEpoxyController
+import com.airbnb.epoxy.stickyheader.StickyHeaderCallbacks
 import studio.ultoolapp.rvadapterlab.R
 import studio.ultoolapp.rvadapterlab.SimpleHeaderBindingModel_
 import studio.ultoolapp.rvadapterlab.SimpleStyleBindingModel_
 import studio.ultoolapp.rvadapterlab.metadata.*
 import java.util.*
 
-class InteractGroupController : TypedEpoxyController<List<DateAmountItem>>() {
+class InteractGroupController : TypedEpoxyController<List<DateAmountItem>>(), StickyHeaderCallbacks {
     interface OnItemClickListener {
         fun onItemClick(rootView: View, item: DateAmountItem, index: Int)
     }
@@ -59,4 +60,5 @@ class InteractGroupController : TypedEpoxyController<List<DateAmountItem>>() {
         }
     }
 
+    override fun isStickyHeader(position: Int) = adapter.getModelAtPosition(position) is SimpleHeaderBindingModel_
 }
