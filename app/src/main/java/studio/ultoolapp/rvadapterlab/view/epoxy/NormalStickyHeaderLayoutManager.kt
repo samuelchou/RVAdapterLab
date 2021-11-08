@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.PointF
 import android.os.Build
 import android.os.Parcelable
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -119,6 +120,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
         restoreView { super.onLayoutChildren(recycler, state) }
         if (!state.isPreLayout) {
+            // TODO: 2021/11/9 below 2 lines - key change
+            Log.d(TAG, "onLayoutChildren: called magic function.")
+            headerPositionsObserver.updateHeaderPositionsIfNeeded()
             updateStickyHeader(recycler, true)
         }
     }
@@ -548,6 +552,10 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      * This is used in detriment of [RecyclerView.LayoutManager]'s callbacks to control when they're received.
      */
     private inner class HeaderPositionsAdapterDataObserver : RecyclerView.AdapterDataObserver() {
+        // TODO: 2021/11/9 below 2 lines - key change
+        var headerPositionsUpdateStart: Int = HEADER_POSITIONS_UPDATE_FULL
+        var headerPositionsUpdateCount: Int = 0
+
         override fun onChanged() {
             // There's no hint at what changed, so go through the adapter.
             headerPositions.clear()
@@ -566,6 +574,13 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         }
 
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            // TODO: 2021/11/9 below 2 lines - key change
+            if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
+                // If a partial update was pending, cancel it and request a full update.
+                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+                return
+            }
+
             // Shift headers below down.
             val headerCount = headerPositions.size
             if (headerCount > 0) {
@@ -576,21 +591,41 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
             }
 
-            // Add new headers.
-            for (i in positionStart until positionStart + itemCount) {
-                val isSticky = adapter?.isStickyHeader(i) ?: false
-                if (isSticky) {
-                    val headerIndex = findHeaderIndexOrNext(i)
-                    if (headerIndex != -1) {
-                        headerPositions.add(headerIndex, i)
-                    } else {
-                        headerPositions.add(i)
-                    }
-                }
-            }
+            // TODO: 2021/11/9 replaced by late-scan. 調查一下
+//            // Add new headers.
+//            for (i in positionStart until positionStart + itemCount) {
+//                val isSticky = adapter?.isStickyHeader(i) ?: false
+//                if (isSticky) {
+//                    val headerIndex = findHeaderIndexOrNext(i)
+//                    if (headerIndex != -1) {
+//                        headerPositions.add(headerIndex, i)
+//                    } else {
+//                        headerPositions.add(i)
+//                    }
+//                }
+//            }
+
+            // Request adding new headers through a partial update.
+            headerPositionsUpdateStart = positionStart
+            headerPositionsUpdateCount = itemCount
         }
 
         override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            // TODO: 2021/11/9 replaced by late-scan. 調查一下
+            val updateStart = headerPositionsUpdateStart
+            if (positionStart == HEADER_POSITIONS_UPDATE_FULL) return
+            if (updateStart != HEADER_POSITIONS_UPDATE_NONE) {
+                // A partial update is pending
+                if (positionStart + itemCount <= updateStart) {
+                    // The removed range is before the pending update range, shift update range down and continue.
+                    headerPositionsUpdateStart -= itemCount
+                } else if (positionStart < updateStart + headerPositionsUpdateCount) {
+                    // The removed range starts before the end of the pending update range and conflicts with it.
+                    headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+                    return
+                }
+            }
+
             var headerCount = headerPositions.size
             if (headerCount > 0) {
                 // Remove headers.
@@ -617,6 +652,14 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         }
 
         override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            // TODO: 2021/11/9 replaced by late-scan. 調查一下
+            if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
+                // If a partial update was pending, cancel it and request a full update.
+                Log.d(TAG, "onItemRangeMoved: magic ready - go full scan.")
+                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+                return
+            }
+
             // Shift moved headers by toPosition - fromPosition.
             // Shift headers in-between by -itemCount (reverse if upwards).
             val headerCount = headerPositions.size
@@ -666,5 +709,54 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 headerPositions.add(headerPos)
             }
         }
+
+        fun updateHeaderPositionsIfNeeded() {
+            val updateStart = headerPositionsUpdateStart
+            if (updateStart == HEADER_POSITIONS_UPDATE_NONE) {
+                Log.d(TAG, "updateHeaderPositionsIfNeeded: no need to run magic function.")
+                return
+            }
+
+            if (updateStart == HEADER_POSITIONS_UPDATE_FULL) {
+                doFullHeaderScan()
+            } else {
+                doPartialHeaderScan(updateStart)
+            }
+            headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_NONE
+        }
+
+        fun doFullHeaderScan() {
+            // Full header scan
+            Log.d(TAG, "updateHeaderPositionsIfNeeded: magic function runs into full scan.")
+            // TODO: 2021/11/9 和 onChanged 程式碼幾乎一模一樣。調查一下。
+            headerPositions.clear()
+            for (i in 0 until (adapter?.itemCount ?: 0)) {
+                if (adapter?.isStickyHeader(i) == true) {
+                    headerPositions.add(i)
+                }
+            }
+
+            // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
+            if (stickyHeader != null && findHeaderIndex(stickyHeaderPosition) == -1) {
+                scrapStickyHeader(null)
+            }
+        }
+
+        fun doPartialHeaderScan(startFromIndex: Int) {
+            // Partial header scan, grow the existing list
+            Log.d(TAG, "updateHeaderPositionsIfNeeded: magic function runs into partial scan.")
+            for (i in startFromIndex until startFromIndex + headerPositionsUpdateCount) {
+                if (adapter?.isStickyHeader(i) == true) {
+                    headerPositions.add(findHeaderIndexOrNext(i), i)
+                }
+            }
+        }
+    }
+
+    companion object {
+        private const val TAG = "NormalStickyHeaderLayoutManager"
+
+        private const val HEADER_POSITIONS_UPDATE_NONE = -1
+        private const val HEADER_POSITIONS_UPDATE_FULL = -2
     }
 }
