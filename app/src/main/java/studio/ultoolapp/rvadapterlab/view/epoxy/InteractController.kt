@@ -49,7 +49,7 @@ class InteractController : TypedEpoxyController<List<DateAmountItem>>(), StickyH
             titleText(item.amount.toCurrencyFormat())
             subtitleText(item.date.toDetailedTimeString())
             clickListener(View.OnClickListener {
-                itemClickListener?.onItemClick(it, item, index)
+                this@InteractController.itemClickListener?.onItemClick(it, item, index)
             })
         }
     }

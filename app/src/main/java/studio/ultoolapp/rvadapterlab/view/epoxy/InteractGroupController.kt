@@ -55,7 +55,7 @@ class InteractGroupController : TypedEpoxyController<List<DateAmountItem>>(), St
             titleText(item.amount.toCurrencyFormat())
             subtitleText(item.date.toDetailedTimeString())
             clickListener(View.OnClickListener {
-                itemClickListener?.onItemClick(it, item, index)
+                this@InteractGroupController.itemClickListener?.onItemClick(it, item, index)
             })
         }
     }
