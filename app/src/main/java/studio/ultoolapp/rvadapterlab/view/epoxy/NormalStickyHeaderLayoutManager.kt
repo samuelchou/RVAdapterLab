@@ -11,6 +11,7 @@ import android.view.ViewTreeObserver
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.BaseEpoxyAdapter
+import com.airbnb.epoxy.stickyheader.StickyHeaderCallbacks
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -506,6 +507,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         }
     }
 
+    // 只修正這些沒有辦法修正、、、下方應該有更關鍵的內容
     /**
      * Finds the header index of `position` in `headerPositions`.
      */
@@ -558,10 +560,12 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
 
         override fun onChanged() {
             // There's no hint at what changed, so go through the adapter.
+            Log.d(TAG, "onChanged: magic start?")
             doFullHeaderScan()
         }
 
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            Log.d(TAG, "onItemRangeInserted: magic start? $positionStart / $itemCount")
             // TODO: 2021/11/9 below 2 lines - key change
             if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
                 // If a partial update was pending, cancel it and request a full update.
@@ -601,6 +605,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         }
 
         override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            Log.d(TAG, "onItemRangeRemoved: magic start? $positionStart / $itemCount")
             // TODO: 2021/11/9 replaced by late-scan. 調查一下
             val updateStart = headerPositionsUpdateStart
             if (positionStart == HEADER_POSITIONS_UPDATE_FULL) return
@@ -644,6 +649,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         }
 
         override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            Log.d(TAG, "onItemRangeMoved: magic start? $fromPosition / $toPosition / $itemCount")
             // TODO: 2021/11/9 replaced by late-scan. 調查一下
             if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
                 // If a partial update was pending, cancel it and request a full update.
@@ -748,6 +754,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     companion object {
         private const val TAG = "NormalStickyHeaderLayoutManager"
 
+        // TODO: 2021/11/9 這兩個常數是否能直接移除呢？改成直接呼叫？
         private const val HEADER_POSITIONS_UPDATE_NONE = -1
         private const val HEADER_POSITIONS_UPDATE_FULL = -2
     }
