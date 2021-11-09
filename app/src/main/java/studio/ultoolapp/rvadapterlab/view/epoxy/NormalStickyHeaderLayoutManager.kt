@@ -558,19 +558,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
 
         override fun onChanged() {
             // There's no hint at what changed, so go through the adapter.
-            headerPositions.clear()
-            val itemCount = adapter?.itemCount ?: 0
-            for (i in 0 until itemCount) {
-                val isSticky = adapter?.isStickyHeader(i) ?: false
-                if (isSticky) {
-                    headerPositions.add(i)
-                }
-            }
-
-            // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
-            if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
-                scrapStickyHeader(null)
-            }
+            doFullHeaderScan()
         }
 
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
@@ -728,7 +716,6 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         fun doFullHeaderScan() {
             // Full header scan
             Log.d(TAG, "updateHeaderPositionsIfNeeded: magic function runs into full scan.")
-            // TODO: 2021/11/9 和 onChanged 程式碼幾乎一模一樣。調查一下。
             headerPositions.clear()
             for (i in 0 until (adapter?.itemCount ?: 0)) {
                 if (adapter?.isStickyHeader(i) == true) {
@@ -737,7 +724,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             }
 
             // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
-            if (stickyHeader != null && findHeaderIndex(stickyHeaderPosition) == -1) {
+            if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
                 scrapStickyHeader(null)
             }
         }
