@@ -553,7 +553,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private inner class HeaderPositionsAdapterDataObserver : RecyclerView.AdapterDataObserver() {
         // TODO: 2021/11/9 below 2 lines - key change
-        var headerPositionsUpdateStart: Int = HEADER_POSITIONS_UPDATE_FULL
+        var headerPositionsUpdateStart: Int = HEADER_POSITIONS_UPDATE_NONE
         var headerPositionsUpdateCount: Int = 0
 
         override fun onChanged() {
@@ -565,7 +565,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             // TODO: 2021/11/9 below 2 lines - key change
             if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
                 // If a partial update was pending, cancel it and request a full update.
-                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+//                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+                Log.d(TAG, "onItemRangeInserted: magic function go full")
+                doFullHeaderScan()
                 return
             }
 
@@ -609,7 +611,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                     headerPositionsUpdateStart -= itemCount
                 } else if (positionStart < updateStart + headerPositionsUpdateCount) {
                     // The removed range starts before the end of the pending update range and conflicts with it.
-                    headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+//                    headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+                    Log.d(TAG, "onItemRangeRemoved: magic function go full")
+                    doFullHeaderScan()
                     return
                 }
             }
@@ -643,8 +647,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             // TODO: 2021/11/9 replaced by late-scan. 調查一下
             if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
                 // If a partial update was pending, cancel it and request a full update.
-                Log.d(TAG, "onItemRangeMoved: magic ready - go full scan.")
-                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+//                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
+                Log.d(TAG, "onItemRangeMoved: magic function go full")
+                doFullHeaderScan()
                 return
             }
 
