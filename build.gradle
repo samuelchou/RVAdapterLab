@@ -2,7 +2,6 @@
 buildscript {
     ext {
         kotlin_version = "1.5.31"
-        epoxyVersion = "4.6.4"
     }
     repositories {
         google()

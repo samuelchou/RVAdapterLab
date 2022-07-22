@@ -54,6 +54,7 @@ dependencies {
     implementation 'eu.davidea:flexible-adapter-databinding:1.0.0'
 
     // Epoxy Series
+    def epoxyVersion = "5.0.0-beta05"
     implementation "com.airbnb.android:epoxy:$epoxyVersion"
     kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
     implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
