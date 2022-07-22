@@ -9,6 +9,7 @@ import android.view.ViewTreeObserver
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.BaseEpoxyAdapter
+import com.airbnb.epoxy.stickyheader.StickyHeaderCallbacks
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -25,6 +26,10 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     orientation: Int = RecyclerView.VERTICAL,
     reverseLayout: Boolean = false,
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
+    companion object {
+        private const val HEADER_POSITIONS_UPDATE_NONE = -1
+        private const val HEADER_POSITIONS_UPDATE_FULL = -2
+    }
 
     private var adapter: BaseEpoxyAdapter? = null
 
@@ -53,8 +58,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     }
 
     override fun onAdapterChanged(
-        oldAdapter: RecyclerView.Adapter<*>?,
-        newAdapter: RecyclerView.Adapter<*>?
+        oldAdapter: RecyclerView.Adapter<*>?, newAdapter: RecyclerView.Adapter<*>?
     ) {
         super.onAdapterChanged(oldAdapter, newAdapter)
         setAdapter(newAdapter)
@@ -89,7 +93,9 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         }
     }
 
-    override fun scrollVerticallyBy(dy: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State?): Int {
+    override fun scrollVerticallyBy(
+        dy: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State?
+    ): Int {
         val scrolled = restoreView { super.scrollVerticallyBy(dy, recycler, state) }
         if (scrolled != 0) {
             updateStickyHeader(recycler, false)
@@ -97,7 +103,9 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         return scrolled
     }
 
-    override fun scrollHorizontallyBy(dx: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State?): Int {
+    override fun scrollHorizontallyBy(
+        dx: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State?
+    ): Int {
         val scrolled = restoreView { super.scrollHorizontallyBy(dx, recycler, state) }
         if (scrolled != 0) {
             updateStickyHeader(recycler, false)
@@ -112,12 +120,15 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         }
     }
 
-    override fun scrollToPosition(position: Int) = scrollToPositionWithOffset(position, INVALID_OFFSET)
+    override fun scrollToPosition(position: Int) =
+        scrollToPositionWithOffset(position, INVALID_OFFSET)
 
     override fun scrollToPositionWithOffset(position: Int, offset: Int) =
         scrollToPositionWithOffset(position, offset, true)
 
-    private fun scrollToPositionWithOffset(position: Int, offset: Int, adjustForStickyHeader: Boolean) {
+    private fun scrollToPositionWithOffset(
+        position: Int, offset: Int, adjustForStickyHeader: Boolean
+    ) {
         // Reset pending scroll.
         setScrollState(RecyclerView.NO_POSITION, INVALID_OFFSET)
 
@@ -246,7 +257,8 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
             if (anchorView != null && anchorPos != -1) {
                 val headerIndex = findHeaderIndexOrBefore(anchorPos)
                 val headerPos = if (headerIndex != -1) headerPositions[headerIndex] else -1
-                val nextHeaderPos = if (headerCount > headerIndex + 1) headerPositions[headerIndex + 1] else -1
+                val nextHeaderPos =
+                    if (headerCount > headerIndex + 1) headerPositions[headerIndex + 1] else -1
 
                 // Show sticky header if:
                 // - There's one to show;
@@ -258,7 +270,9 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
                 ) {
                     // 1. Ensure existing sticky header, if any, is of correct type.
                     var header = stickyHeader
-                    if (header != null && getItemViewType(header) != adapter?.getItemViewType(headerPos)) {
+                    if (header != null &&
+                        getItemViewType(header) != adapter?.getItemViewType(headerPos)
+                    ) {
                         // A sticky header was shown before but is not of the correct type. Scrap it.
                         scrapStickyHeader(recycler)
                         header = null
@@ -318,7 +332,9 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     /**
      * Binds the [stickyHeader] for the given [position].
      */
-    private fun bindStickyHeader(recycler: RecyclerView.Recycler, stickyHeader: View, position: Int) {
+    private fun bindStickyHeader(
+        recycler: RecyclerView.Recycler, stickyHeader: View, position: Int
+    ) {
         // Bind the sticky header.
         recycler.bindViewToPosition(stickyHeader, position)
         stickyHeaderPosition = position
@@ -326,15 +342,16 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
 
         // If we have a pending scroll wait until the end of layout and scroll again.
         if (scrollPosition != RecyclerView.NO_POSITION) {
-            stickyHeader.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    stickyHeader.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    if (scrollPosition != RecyclerView.NO_POSITION) {
-                        scrollToPositionWithOffset(scrollPosition, scrollOffset)
-                        setScrollState(RecyclerView.NO_POSITION, INVALID_OFFSET)
+            stickyHeader.viewTreeObserver
+                .addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        stickyHeader.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        if (scrollPosition != RecyclerView.NO_POSITION) {
+                            scrollToPositionWithOffset(scrollPosition, scrollOffset)
+                            setScrollState(RecyclerView.NO_POSITION, INVALID_OFFSET)
+                        }
                     }
-                }
-            })
+                })
         }
     }
 
@@ -344,8 +361,12 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     private fun measureAndLayout(stickyHeader: View) {
         measureChildWithMargins(stickyHeader, 0, 0)
         when (orientation) {
-            VERTICAL -> stickyHeader.layout(paddingLeft, 0, width - paddingRight, stickyHeader.measuredHeight)
-            else -> stickyHeader.layout(0, paddingTop, stickyHeader.measuredWidth, height - paddingBottom)
+            VERTICAL -> stickyHeader.layout(
+                paddingLeft, 0, width - paddingRight, stickyHeader.measuredHeight
+            )
+            else -> stickyHeader.layout(
+                0, paddingTop, stickyHeader.measuredWidth, height - paddingBottom
+            )
         }
     }
 
@@ -422,11 +443,15 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
                     y += (height - headerView.height).toFloat()
                 }
                 if (nextHeaderView != null) {
-                    val bottomMargin = (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
-                    val topMargin = (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).topMargin
+                    val bottomMargin =
+                        (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+                    val topMargin =
+                        (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).topMargin
                     y = when {
-                        reverseLayout -> (nextHeaderView.bottom + bottomMargin).toFloat().coerceAtLeast(y)
-                        else -> (nextHeaderView.top - topMargin - headerView.height).toFloat().coerceAtMost(y)
+                        reverseLayout -> (nextHeaderView.bottom + bottomMargin).toFloat()
+                            .coerceAtLeast(y)
+                        else -> (nextHeaderView.top - topMargin - headerView.height).toFloat()
+                            .coerceAtMost(y)
                     }
                 }
                 return y
@@ -447,11 +472,15 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
                     x += (width - headerView.width).toFloat()
                 }
                 if (nextHeaderView != null) {
-                    val leftMargin = (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).leftMargin
-                    val rightMargin = (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).rightMargin
+                    val leftMargin =
+                        (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).leftMargin
+                    val rightMargin =
+                        (nextHeaderView.layoutParams as ViewGroup.MarginLayoutParams).rightMargin
                     x = when {
-                        reverseLayout -> (nextHeaderView.right + rightMargin).toFloat().coerceAtLeast(x)
-                        else -> (nextHeaderView.left - leftMargin - headerView.width).toFloat().coerceAtMost(x)
+                        reverseLayout -> (nextHeaderView.right + rightMargin).toFloat()
+                            .coerceAtLeast(x)
+                        else -> (nextHeaderView.left - leftMargin - headerView.width).toFloat()
+                            .coerceAtMost(x)
                     }
                 }
                 return x
@@ -665,10 +694,5 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
             }
         }
-    }
-
-    companion object {
-        private const val HEADER_POSITIONS_UPDATE_NONE = -1
-        private const val HEADER_POSITIONS_UPDATE_FULL = -2
     }
 }

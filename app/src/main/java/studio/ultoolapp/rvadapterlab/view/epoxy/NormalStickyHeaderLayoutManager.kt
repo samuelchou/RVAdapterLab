@@ -33,6 +33,13 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     orientation: Int = RecyclerView.VERTICAL,
     reverseLayout: Boolean = false
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
+    companion object {
+        private const val TAG = "NormalStickyHeaderLayoutManager"
+
+        // TODO: 2021/11/9 這兩個常數是否能直接移除呢？改成直接呼叫？
+        private const val HEADER_POSITIONS_UPDATE_NONE = -1
+        private const val HEADER_POSITIONS_UPDATE_FULL = -2
+    }
 
     private var adapter: BaseEpoxyAdapter? = null
 
@@ -138,9 +145,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         scrollToPositionWithOffset(position, offset, true)
 
     private fun scrollToPositionWithOffset(
-        position: Int,
-        offset: Int,
-        adjustForStickyHeader: Boolean
+        position: Int, offset: Int, adjustForStickyHeader: Boolean
     ) {
         // Reset pending scroll.
         setScrollState(RecyclerView.NO_POSITION, INVALID_OFFSET)
@@ -283,7 +288,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 ) {
                     // 1. Ensure existing sticky header, if any, is of correct type.
                     var header = stickyHeader
-                    if (header != null && getItemViewType(header) != adapter?.getItemViewType(headerPos)) {
+                    if (header != null &&
+                        getItemViewType(header) != adapter?.getItemViewType(headerPos)
+                    ) {
                         // A sticky header was shown before but is not of the correct type. Scrap it.
                         scrapStickyHeader(recycler)
                         header = null
@@ -357,9 +364,8 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             stickyHeader.viewTreeObserver.addOnGlobalLayoutListener(object :
                 ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    if (Build.VERSION.SDK_INT < 16) stickyHeader.viewTreeObserver.removeGlobalOnLayoutListener(
-                        this
-                    )
+                    if (Build.VERSION.SDK_INT < 16)
+                        stickyHeader.viewTreeObserver.removeGlobalOnLayoutListener(this)
                     else stickyHeader.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     if (scrollPosition != RecyclerView.NO_POSITION) {
                         scrollToPositionWithOffset(scrollPosition, scrollOffset)
@@ -377,16 +383,10 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         measureChildWithMargins(stickyHeader, 0, 0)
         when (orientation) {
             VERTICAL -> stickyHeader.layout(
-                paddingLeft,
-                0,
-                width - paddingRight,
-                stickyHeader.measuredHeight
+                paddingLeft, 0, width - paddingRight, stickyHeader.measuredHeight
             )
             else -> stickyHeader.layout(
-                0,
-                paddingTop,
-                stickyHeader.measuredWidth,
-                height - paddingBottom
+                0, paddingTop, stickyHeader.measuredWidth, height - paddingBottom
             )
         }
     }
@@ -757,13 +757,5 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
             }
         }
-    }
-
-    companion object {
-        private const val TAG = "NormalStickyHeaderLayoutManager"
-
-        // TODO: 2021/11/9 這兩個常數是否能直接移除呢？改成直接呼叫？
-        private const val HEADER_POSITIONS_UPDATE_NONE = -1
-        private const val HEADER_POSITIONS_UPDATE_FULL = -2
     }
 }
