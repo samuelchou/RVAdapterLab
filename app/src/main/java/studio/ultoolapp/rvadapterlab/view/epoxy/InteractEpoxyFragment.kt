@@ -14,7 +14,9 @@ import studio.ultoolapp.rvadapterlab.metadata.toCurrencyFormat
 import studio.ultoolapp.rvadapterlab.metadata.toYMDPlainString
 import java.util.*
 
-class InteractEpoxyFragment : Fragment() {
+class InteractEpoxyFragment(
+    private val useLayoutManagerType: LayoutManagerType = LayoutManagerType.Standard
+) : Fragment() {
     private lateinit var binding: FragmentInteractEpoxyBinding
 
     private val itemLists = mutableListOf<DateAmountItem>()
@@ -34,7 +36,11 @@ class InteractEpoxyFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         itemLists.addAll(getDummyLists(100))
 
-        binding.itemListRecycler.layoutManager = StickyHeaderLinearLayoutManager(requireContext())
+        binding.itemListRecycler.layoutManager = when(useLayoutManagerType) {
+            LayoutManagerType.Standard -> StickyHeaderLinearLayoutManager(requireContext())
+            LayoutManagerType.Simplified -> NormalStickyHeaderLayoutManager(requireContext())
+            LayoutManagerType.Modified -> EpoxyFixedStickyHeaderLayoutManager(requireContext())
+        }
         listAdapter = InteractEpoxyItemAdapter().apply {
             itemClickListener = object : InteractEpoxyItemAdapter.OnItemClickListener {
                 override fun onItemClick(rootView: View, item: DateAmountItem, index: Int) {
@@ -91,3 +97,5 @@ class InteractEpoxyFragment : Fragment() {
         }
     }
 }
+
+enum class LayoutManagerType { Standard, Simplified, Modified }
