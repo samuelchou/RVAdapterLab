@@ -64,7 +64,6 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         setAdapter(newAdapter)
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun setAdapter(newAdapter: RecyclerView.Adapter<*>?) {
         adapter?.unregisterAdapterDataObserver(headerPositionsObserver)
         if (newAdapter is BaseEpoxyAdapter) {
@@ -361,7 +360,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     private fun measureAndLayout(stickyHeader: View) {
         measureChildWithMargins(stickyHeader, 0, 0)
         when (orientation) {
-            VERTICAL -> stickyHeader.layout(
+            RecyclerView.VERTICAL -> stickyHeader.layout(
                 paddingLeft, 0, width - paddingRight, stickyHeader.measuredHeight
             )
             else -> stickyHeader.layout(
@@ -402,7 +401,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     private fun isViewValidAnchor(view: View, params: RecyclerView.LayoutParams): Boolean {
         return when {
             !params.isItemRemoved && !params.isViewInvalid -> when (orientation) {
-                VERTICAL -> when {
+                RecyclerView.VERTICAL -> when {
                     reverseLayout -> view.top + view.translationY <= height + translationY
                     else -> view.bottom - view.translationY >= translationY
                 }
@@ -420,7 +419,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private fun isViewOnBoundary(view: View): Boolean {
         return when (orientation) {
-            VERTICAL -> when {
+            RecyclerView.VERTICAL -> when {
                 reverseLayout -> view.bottom - view.translationY > height + translationY
                 else -> view.top + view.translationY < translationY
             }
@@ -437,7 +436,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private fun getY(headerView: View, nextHeaderView: View?): Float {
         when (orientation) {
-            VERTICAL -> {
+            RecyclerView.VERTICAL -> {
                 var y = translationY
                 if (reverseLayout) {
                     y += (height - headerView.height).toFloat()
@@ -466,7 +465,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private fun getX(headerView: View, nextHeaderView: View?): Float {
         when (orientation) {
-            HORIZONTAL -> {
+            RecyclerView.HORIZONTAL -> {
                 var x = translationX
                 if (reverseLayout) {
                     x += (width - headerView.width).toFloat()
