@@ -52,6 +52,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     private var scrollPosition = RecyclerView.NO_POSITION
     private var scrollOffset = 0
 
+    // region Init Setting
     override fun onAttachedToWindow(recyclerView: RecyclerView) {
         super.onAttachedToWindow(recyclerView)
         setAdapter(recyclerView.adapter)
@@ -93,7 +94,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             super.onRestoreInstanceState(it.superState)
         }
     }
+    // endregion Init Setting
 
+    // region Scroll Setting
     override fun scrollVerticallyBy(
         dy: Int,
         recycler: RecyclerView.Recycler,
@@ -173,8 +176,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         setScrollState(position, offset)
         super.scrollToPositionWithOffset(position, offset)
     }
+    // endregion Scroll Setting
 
-    //region Computation
+    // region Computation
     // Mainly [RecyclerView] functionality by removing sticky header from calculations
 
     override fun computeVerticalScrollExtent(state: RecyclerView.State): Int =
@@ -218,6 +222,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
 
     //endregion
 
+    // region Public Call
     /**
      * Offsets the vertical location of the sticky header relative to the its default position.
      */
@@ -238,7 +243,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      * Returns true if `view` is the current sticky header.
      */
     fun isStickyHeader(view: View): Boolean = view === stickyHeader
+    // endregion Public Call
 
+    // region Sticky Header Generation
     /**
      * Updates the sticky header state (creation, binding, display), to be called whenever there's a layout or scroll
      */
@@ -506,6 +513,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             else -> return translationX
         }
     }
+    // endregion Sticky Header Generation
 
     // 只修正這些沒有辦法修正、、、下方應該有更關鍵的內容
     /**
