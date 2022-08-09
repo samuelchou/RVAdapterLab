@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.PointF
 import android.os.Build
 import android.os.Parcelable
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -33,13 +32,6 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     orientation: Int = RecyclerView.VERTICAL,
     reverseLayout: Boolean = false
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
-    companion object {
-        private const val TAG = "NormalStickyHeaderLayoutManager"
-
-        // TODO: 2021/11/9 這兩個常數是否能直接移除呢？改成直接呼叫？
-        private const val HEADER_POSITIONS_UPDATE_NONE = -1
-        private const val HEADER_POSITIONS_UPDATE_FULL = -2
-    }
 
     private var adapter: BaseEpoxyAdapter? = null
 
@@ -66,8 +58,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     }
 
     override fun onAdapterChanged(
-        oldAdapter: RecyclerView.Adapter<*>?,
-        newAdapter: RecyclerView.Adapter<*>?
+        oldAdapter: RecyclerView.Adapter<*>?, newAdapter: RecyclerView.Adapter<*>?
     ) {
         super.onAdapterChanged(oldAdapter, newAdapter)
         setAdapter(newAdapter)
@@ -101,13 +92,9 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             super.onRestoreInstanceState(it.superState)
         }
     }
-    // endregion Init Setting
 
-    // region Scroll Setting
     override fun scrollVerticallyBy(
-        dy: Int,
-        recycler: RecyclerView.Recycler,
-        state: RecyclerView.State?
+        dy: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State?
     ): Int {
         val scrolled = restoreView { super.scrollVerticallyBy(dy, recycler, state) }
         if (scrolled != 0) {
@@ -117,9 +104,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     }
 
     override fun scrollHorizontallyBy(
-        dx: Int,
-        recycler: RecyclerView.Recycler,
-        state: RecyclerView.State?
+        dx: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State?
     ): Int {
         val scrolled = restoreView { super.scrollHorizontallyBy(dx, recycler, state) }
         if (scrolled != 0) {
@@ -131,9 +116,6 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
         restoreView { super.onLayoutChildren(recycler, state) }
         if (!state.isPreLayout) {
-            // TODO: 2021/11/9 below 2 lines - key change
-            Log.d(TAG, "onLayoutChildren: called magic function.")
-            headerPositionsObserver.updateHeaderPositionsIfNeeded()
             updateStickyHeader(recycler, true)
         }
     }
@@ -287,31 +269,31 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                     nextHeaderPos != headerPos + 1
                 ) {
                     // 1. Ensure existing sticky header, if any, is of correct type.
-                    var header = stickyHeader
-                    if (header != null &&
-                        getItemViewType(header) != adapter?.getItemViewType(headerPos)
+                    if (stickyHeader != null &&
+                        getItemViewType(stickyHeader!!) != adapter?.getItemViewType(headerPos)
                     ) {
                         // A sticky header was shown before but is not of the correct type. Scrap it.
                         scrapStickyHeader(recycler)
-                        header = null
                     }
 
                     // 2. Ensure sticky header is created, if absent, or bound, if being laid out or the position changed.
-                    if (header == null) header = createStickyHeader(recycler, headerPos)
+                    if (stickyHeader == null) createStickyHeader(recycler, headerPos)
                     // 3. Bind the sticky header
-                    if (layout || getPosition(header) != headerPos) {
-                        bindStickyHeader(recycler, header, headerPos)
-                    }
+                    if (layout || getPosition(stickyHeader!!) != headerPos)
+                        bindStickyHeader(recycler, stickyHeader!!, headerPos)
 
                     // 4. Draw the sticky header using translation values which depend on orientation, direction and
                     // position of the next header view.
-                    val nextHeaderView: View? = if (nextHeaderPos != -1) {
-                        val nextHeaderView = getChildAt(anchorIndex + (nextHeaderPos - anchorPos))
-                        // The header view itself is added to the RecyclerView. Discard it if it comes up.
-                        if (nextHeaderView === stickyHeader) null else nextHeaderView
-                    } else null
-                    header.translationX = getX(header, nextHeaderView)
-                    header.translationY = getY(header, nextHeaderView)
+                    stickyHeader?.let {
+                        val nextHeaderView: View? = if (nextHeaderPos != -1) {
+                            val nextHeaderView =
+                                getChildAt(anchorIndex + (nextHeaderPos - anchorPos))
+                            // The header view itself is added to the RecyclerView. Discard it if it comes up.
+                            if (nextHeaderView === stickyHeader) null else nextHeaderView
+                        } else null
+                        it.translationX = getX(it, nextHeaderView)
+                        it.translationY = getY(it, nextHeaderView)
+                    }
                     return
                 }
             }
@@ -350,9 +332,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      * Binds the [stickyHeader] for the given [position].
      */
     private fun bindStickyHeader(
-        recycler: RecyclerView.Recycler,
-        stickyHeader: View,
-        position: Int
+        recycler: RecyclerView.Recycler, stickyHeader: View, position: Int
     ) {
         // Bind the sticky header.
         recycler.bindViewToPosition(stickyHeader, position)
@@ -382,7 +362,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     private fun measureAndLayout(stickyHeader: View) {
         measureChildWithMargins(stickyHeader, 0, 0)
         when (orientation) {
-            VERTICAL -> stickyHeader.layout(
+            RecyclerView.VERTICAL -> stickyHeader.layout(
                 paddingLeft, 0, width - paddingRight, stickyHeader.measuredHeight
             )
             else -> stickyHeader.layout(
@@ -423,7 +403,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     private fun isViewValidAnchor(view: View, params: RecyclerView.LayoutParams): Boolean {
         return when {
             !params.isItemRemoved && !params.isViewInvalid -> when (orientation) {
-                VERTICAL -> when {
+                RecyclerView.VERTICAL -> when {
                     reverseLayout -> view.top + view.translationY <= height + translationY
                     else -> view.bottom - view.translationY >= translationY
                 }
@@ -441,7 +421,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private fun isViewOnBoundary(view: View): Boolean {
         return when (orientation) {
-            VERTICAL -> when {
+            RecyclerView.VERTICAL -> when {
                 reverseLayout -> view.bottom - view.translationY > height + translationY
                 else -> view.top + view.translationY < translationY
             }
@@ -458,24 +438,21 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private fun getY(headerView: View, nextHeaderView: View?): Float {
         when (orientation) {
-            VERTICAL -> {
+            RecyclerView.VERTICAL -> {
                 var y = translationY
                 if (reverseLayout) {
                     y += (height - headerView.height).toFloat()
                 }
                 if (nextHeaderView != null) {
-                    val bottomMargin =
-                        (nextHeaderView.layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin
-                            ?: 0
-                    val topMargin =
-                        (nextHeaderView.layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin
-                            ?: 0
-                    y = when {
-                        reverseLayout -> (nextHeaderView.bottom + bottomMargin).toFloat()
-                            .coerceAtLeast(y)
-                        else -> (nextHeaderView.top - topMargin - headerView.height).toFloat()
-                            .coerceAtMost(y)
-                    }
+                    val params = nextHeaderView.layoutParams as? ViewGroup.MarginLayoutParams
+                    val bottomMargin = params?.bottomMargin ?: 0
+                    val topMargin = params?.topMargin ?: 0
+
+                    val comparePos: Int =
+                        if (reverseLayout) (nextHeaderView.bottom + bottomMargin)
+                        else (nextHeaderView.top - topMargin - headerView.height)
+
+                    y = comparePos.toFloat().coerceAtLeast(y)
                 }
                 return y
             }
@@ -489,33 +466,28 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private fun getX(headerView: View, nextHeaderView: View?): Float {
         when (orientation) {
-            HORIZONTAL -> {
+            RecyclerView.HORIZONTAL -> {
                 var x = translationX
                 if (reverseLayout) {
                     x += (width - headerView.width).toFloat()
                 }
                 if (nextHeaderView != null) {
-                    val leftMargin =
-                        (nextHeaderView.layoutParams as? ViewGroup.MarginLayoutParams)?.leftMargin
-                            ?: 0
-                    val rightMargin =
-                        (nextHeaderView.layoutParams as? ViewGroup.MarginLayoutParams)?.rightMargin
-                            ?: 0
-                    x = when {
-                        reverseLayout -> (nextHeaderView.right + rightMargin).toFloat()
-                            .coerceAtLeast(x)
-                        else -> (nextHeaderView.left - leftMargin - headerView.width).toFloat()
-                            .coerceAtMost(x)
-                    }
+                    val params = nextHeaderView.layoutParams as? ViewGroup.MarginLayoutParams
+                    val leftMargin = params?.leftMargin ?: 0
+                    val rightMargin = params?.rightMargin ?: 0
+
+                    val comparePos =
+                        if (reverseLayout) (nextHeaderView.right + rightMargin)
+                        else (nextHeaderView.left - leftMargin - headerView.width)
+
+                    x = comparePos.toFloat().coerceAtLeast(x)
                 }
                 return x
             }
             else -> return translationX
         }
     }
-    // endregion Sticky Header Generation
 
-    // 只修正這些沒有辦法修正、、、下方應該有更關鍵的內容
     /**
      * Finds the header index of `position` in `headerPositions`.
      */
@@ -562,27 +534,24 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
      * This is used in detriment of [RecyclerView.LayoutManager]'s callbacks to control when they're received.
      */
     private inner class HeaderPositionsAdapterDataObserver : RecyclerView.AdapterDataObserver() {
-        // TODO: 2021/11/9 below 2 lines - key change
-        var headerPositionsUpdateStart: Int = HEADER_POSITIONS_UPDATE_NONE
-        var headerPositionsUpdateCount: Int = 0
-
         override fun onChanged() {
             // There's no hint at what changed, so go through the adapter.
-            Log.d(TAG, "onChanged: magic start?")
-            doFullHeaderScan()
+            headerPositions.clear()
+            val itemCount = adapter?.itemCount ?: 0
+            for (i in 0 until itemCount) {
+                val isSticky = adapter?.isStickyHeader(i) ?: false
+                if (isSticky) {
+                    headerPositions.add(i)
+                }
+            }
+
+            // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
+            if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
+                scrapStickyHeader(null)
+            }
         }
 
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-            Log.d(TAG, "onItemRangeInserted: magic start? $positionStart / $itemCount")
-            // TODO: 2021/11/9 below 2 lines - key change
-            if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
-                // If a partial update was pending, cancel it and request a full update.
-//                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
-                Log.d(TAG, "onItemRangeInserted: magic function go full")
-                doFullHeaderScan()
-                return
-            }
-
             // Shift headers below down.
             val headerCount = headerPositions.size
             if (headerCount > 0) {
@@ -593,44 +562,21 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
             }
 
-            // TODO: 2021/11/9 replaced by late-scan. 調查一下
-//            // Add new headers.
-//            for (i in positionStart until positionStart + itemCount) {
-//                val isSticky = adapter?.isStickyHeader(i) ?: false
-//                if (isSticky) {
-//                    val headerIndex = findHeaderIndexOrNext(i)
-//                    if (headerIndex != -1) {
-//                        headerPositions.add(headerIndex, i)
-//                    } else {
-//                        headerPositions.add(i)
-//                    }
-//                }
-//            }
-
-            // Request adding new headers through a partial update.
-            headerPositionsUpdateStart = positionStart
-            headerPositionsUpdateCount = itemCount
+            // Add new headers.
+            for (i in positionStart until positionStart + itemCount) {
+                val isSticky = adapter?.isStickyHeader(i) ?: false
+                if (isSticky) {
+                    val headerIndex = findHeaderIndexOrNext(i)
+                    if (headerIndex != -1) {
+                        headerPositions.add(headerIndex, i)
+                    } else {
+                        headerPositions.add(i)
+                    }
+                }
+            }
         }
 
         override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-            Log.d(TAG, "onItemRangeRemoved: magic start? $positionStart / $itemCount")
-            // TODO: 2021/11/9 replaced by late-scan. 調查一下
-            val updateStart = headerPositionsUpdateStart
-            if (positionStart == HEADER_POSITIONS_UPDATE_FULL) return
-            if (updateStart != HEADER_POSITIONS_UPDATE_NONE) {
-                // A partial update is pending
-                if (positionStart + itemCount <= updateStart) {
-                    // The removed range is before the pending update range, shift update range down and continue.
-                    headerPositionsUpdateStart -= itemCount
-                } else if (positionStart < updateStart + headerPositionsUpdateCount) {
-                    // The removed range starts before the end of the pending update range and conflicts with it.
-//                    headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
-                    Log.d(TAG, "onItemRangeRemoved: magic function go full")
-                    doFullHeaderScan()
-                    return
-                }
-            }
-
             var headerCount = headerPositions.size
             if (headerCount > 0) {
                 // Remove headers.
@@ -657,16 +603,6 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
         }
 
         override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
-            Log.d(TAG, "onItemRangeMoved: magic start? $fromPosition / $toPosition / $itemCount")
-            // TODO: 2021/11/9 replaced by late-scan. 調查一下
-            if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
-                // If a partial update was pending, cancel it and request a full update.
-//                headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
-                Log.d(TAG, "onItemRangeMoved: magic function go full")
-                doFullHeaderScan()
-                return
-            }
-
             // Shift moved headers by toPosition - fromPosition.
             // Shift headers in-between by -itemCount (reverse if upwards).
             val headerCount = headerPositions.size
@@ -714,47 +650,6 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 headerPositions.add(headerIndex, headerPos)
             } else {
                 headerPositions.add(headerPos)
-            }
-        }
-
-        fun updateHeaderPositionsIfNeeded() {
-            val updateStart = headerPositionsUpdateStart
-            if (updateStart == HEADER_POSITIONS_UPDATE_NONE) {
-                Log.d(TAG, "updateHeaderPositionsIfNeeded: no need to run magic function.")
-                return
-            }
-
-            if (updateStart == HEADER_POSITIONS_UPDATE_FULL) {
-                doFullHeaderScan()
-            } else {
-                doPartialHeaderScan(updateStart)
-            }
-            headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_NONE
-        }
-
-        fun doFullHeaderScan() {
-            // Full header scan
-            Log.d(TAG, "updateHeaderPositionsIfNeeded: magic function runs into full scan.")
-            headerPositions.clear()
-            for (i in 0 until (adapter?.itemCount ?: 0)) {
-                if (adapter?.isStickyHeader(i) == true) {
-                    headerPositions.add(i)
-                }
-            }
-
-            // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
-            if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
-                scrapStickyHeader(null)
-            }
-        }
-
-        fun doPartialHeaderScan(startFromIndex: Int) {
-            // Partial header scan, grow the existing list
-            Log.d(TAG, "updateHeaderPositionsIfNeeded: magic function runs into partial scan.")
-            for (i in startFromIndex until startFromIndex + headerPositionsUpdateCount) {
-                if (adapter?.isStickyHeader(i) == true) {
-                    headerPositions.add(findHeaderIndexOrNext(i), i)
-                }
             }
         }
     }
