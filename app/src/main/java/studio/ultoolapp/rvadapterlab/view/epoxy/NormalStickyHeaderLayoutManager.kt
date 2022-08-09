@@ -611,11 +611,11 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 while (i in 0 until headerCount) {
                     val headerPos = headerPositions[i]
                     if (headerPos >= fromPosition && headerPos < fromPosition + itemCount) {
-                        removeHeaderPositionAt(i)
-                        insertHeaderPositionSorted(headerPos - toPosition + fromPosition)
+                        headerPositions[i] = headerPos - (toPosition - fromPosition)
+                        sortHeaderAtIndex(i)
                     } else if (headerPos >= fromPosition + itemCount && headerPos <= toPosition) {
-                        removeHeaderPositionAt(i)
-                        insertHeaderPositionSorted(headerPos - itemCount)
+                        headerPositions[i] = headerPos - itemCount
+                        sortHeaderAtIndex(i)
                     } else {
                         break
                     }
@@ -627,12 +627,12 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                     val headerPos = headerPositions[i]
                     when {
                         headerPos >= fromPosition && headerPos < fromPosition + itemCount -> {
-                            removeHeaderPositionAt(i)
-                            insertHeaderPositionSorted(headerPos + toPosition - fromPosition)
+                            headerPositions[i] = headerPos + (toPosition - fromPosition)
+                            sortHeaderAtIndex(i)
                         }
                         headerPos in toPosition..fromPosition -> {
-                            removeHeaderPositionAt(i)
-                            insertHeaderPositionSorted(headerPos + itemCount)
+                            headerPositions[i] = headerPos + itemCount
+                            sortHeaderAtIndex(i)
                         }
                         else -> break@loop
                     }
@@ -640,7 +640,6 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
             }
         }
-    }
 
         private fun sortHeaderAtIndex(index: Int) {
             val headerPos = headerPositions.removeAt(index)
