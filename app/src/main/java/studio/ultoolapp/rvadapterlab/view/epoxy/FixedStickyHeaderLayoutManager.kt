@@ -26,10 +26,6 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     orientation: Int = RecyclerView.VERTICAL,
     reverseLayout: Boolean = false,
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
-    companion object {
-        private const val HEADER_POSITIONS_UPDATE_NONE = -1
-        private const val HEADER_POSITIONS_UPDATE_FULL = -2
-    }
 
     private var adapter: BaseEpoxyAdapter? = null
 
@@ -657,41 +653,45 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
             // Shift moved headers by toPosition - fromPosition.
             // Shift headers in-between by -itemCount (reverse if upwards).
             val headerCount = headerPositions.size
-            if (headerCount > 0) {
-                if (fromPosition < toPosition) {
-                    var i = findHeaderIndexOrNext(fromPosition)
-                    while (i in 0 until headerCount) {
-                        val headerPos = headerPositions[i]
-                        if (headerPos >= fromPosition && headerPos < fromPosition + itemCount) {
-                            removeHeaderPositionAt(i)
-                            insertHeaderPositionSorted(headerPos - toPosition + fromPosition)
-                        } else if (headerPos >= fromPosition + itemCount && headerPos <= toPosition) {
-                            removeHeaderPositionAt(i)
-                            insertHeaderPositionSorted(headerPos - itemCount)
-                        } else {
-                            break
-                        }
-                        i++
+            if (headerCount <= 0) return
+            if (fromPosition < toPosition) {
+                var i = findHeaderIndexOrNext(fromPosition)
+                while (i in 0 until headerCount) {
+                    val headerPos = headerPositions[i]
+                    if (headerPos >= fromPosition && headerPos < fromPosition + itemCount) {
+                        removeHeaderPositionAt(i)
+                        insertHeaderPositionSorted(headerPos - toPosition + fromPosition)
+                    } else if (headerPos >= fromPosition + itemCount && headerPos <= toPosition) {
+                        removeHeaderPositionAt(i)
+                        insertHeaderPositionSorted(headerPos - itemCount)
+                    } else {
+                        break
                     }
-                } else {
-                    var i = findHeaderIndexOrNext(toPosition)
-                    loop@ while (i in 0 until headerCount) {
-                        val headerPos = headerPositions[i]
-                        when {
-                            headerPos >= fromPosition && headerPos < fromPosition + itemCount -> {
-                                removeHeaderPositionAt(i)
-                                insertHeaderPositionSorted(headerPos + toPosition - fromPosition)
-                            }
-                            headerPos in toPosition..fromPosition -> {
-                                removeHeaderPositionAt(i)
-                                insertHeaderPositionSorted(headerPos + itemCount)
-                            }
-                            else -> break@loop
+                    i++
+                }
+            } else {
+                var i = findHeaderIndexOrNext(toPosition)
+                loop@ while (i in 0 until headerCount) {
+                    val headerPos = headerPositions[i]
+                    when {
+                        headerPos >= fromPosition && headerPos < fromPosition + itemCount -> {
+                            removeHeaderPositionAt(i)
+                            insertHeaderPositionSorted(headerPos + toPosition - fromPosition)
                         }
-                        i++
+                        headerPos in toPosition..fromPosition -> {
+                            removeHeaderPositionAt(i)
+                            insertHeaderPositionSorted(headerPos + itemCount)
+                        }
+                        else -> break@loop
                     }
+                    i++
                 }
             }
         }
+    }
+
+    companion object {
+        private const val HEADER_POSITIONS_UPDATE_NONE = -1
+        private const val HEADER_POSITIONS_UPDATE_FULL = -2
     }
 }
