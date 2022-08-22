@@ -39,7 +39,7 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     private var translationY: Float = 0f
 
     // Header positions for the currently displayed list and their observer.
-    private val headerPositions = mutableListOf<Int>()
+    private val headerPositions = mutableSetOf<Int>()
     private val headerPositionsObserver = HeaderPositionsAdapterDataObserver()
 
     // Sticky header's ViewHolder and dirty state.
@@ -254,49 +254,50 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
             }
             if (anchorView != null && anchorPos != -1) {
-                val headerIndex = findHeaderIndexOrBefore(anchorPos)
-                val headerPos = if (headerIndex != -1) headerPositions[headerIndex] else -1
-                val nextHeaderPos =
-                    if (headerCount > headerIndex + 1) headerPositions[headerIndex + 1] else -1
-
-                // Show sticky header if:
-                // - There's one to show;
-                // - It's on the edge or it's not the anchor view;
-                // - Isn't followed by another sticky header;
-                if (headerPos != -1 &&
-                    (headerPos != anchorPos || isViewOnBoundary(anchorView)) &&
-                    nextHeaderPos != headerPos + 1
-                ) {
-                    // 1. Ensure existing sticky header, if any, is of correct type.
-                    var header = stickyHeader
-                    if (header != null &&
-                        getItemViewType(header) != adapter?.getItemViewType(headerPos)
-                    ) {
-                        // A sticky header was shown before but is not of the correct type. Scrap it.
-                        scrapStickyHeader(recycler)
-                        header = null
-                    }
-
-                    // 2. Ensure sticky header is created, if absent, or bound, if being laid out or the position changed.
-                    if (header == null) {
-                        header = createStickyHeader(recycler, headerPos)
-                    }
-                    // 3. Bind the sticky header
-                    if (layout || getPosition(header) != headerPos) {
-                        bindStickyHeader(recycler, header, headerPos)
-                    }
-
-                    // 4. Draw the sticky header using translation values which depend on orientation, direction and
-                    // position of the next header view.
-                    val nextHeaderView: View? = if (nextHeaderPos != -1) {
-                        val nextHeaderView = getChildAt(anchorIndex + (nextHeaderPos - anchorPos))
-                        // The header view itself is added to the RecyclerView. Discard it if it comes up.
-                        if (nextHeaderView === header) null else nextHeaderView
-                    } else null
-                    header.translationX = getX(header, nextHeaderView)
-                    header.translationY = getY(header, nextHeaderView)
-                    return
-                }
+                // TODO: 2022.08.22 改用 Set structure.
+//                val headerIndex = findHeaderIndexOrBefore(anchorPos)
+//                val headerPos = if (headerIndex != -1) headerPositions[headerIndex] else -1
+//                val nextHeaderPos =
+//                    if (headerCount > headerIndex + 1) headerPositions[headerIndex + 1] else -1
+//
+//                // Show sticky header if:
+//                // - There's one to show;
+//                // - It's on the edge or it's not the anchor view;
+//                // - Isn't followed by another sticky header;
+//                if (headerPos != -1 &&
+//                    (headerPos != anchorPos || isViewOnBoundary(anchorView)) &&
+//                    nextHeaderPos != headerPos + 1
+//                ) {
+//                    // 1. Ensure existing sticky header, if any, is of correct type.
+//                    var header = stickyHeader
+//                    if (header != null &&
+//                        getItemViewType(header) != adapter?.getItemViewType(headerPos)
+//                    ) {
+//                        // A sticky header was shown before but is not of the correct type. Scrap it.
+//                        scrapStickyHeader(recycler)
+//                        header = null
+//                    }
+//
+//                    // 2. Ensure sticky header is created, if absent, or bound, if being laid out or the position changed.
+//                    if (header == null) {
+//                        header = createStickyHeader(recycler, headerPos)
+//                    }
+//                    // 3. Bind the sticky header
+//                    if (layout || getPosition(header) != headerPos) {
+//                        bindStickyHeader(recycler, header, headerPos)
+//                    }
+//
+//                    // 4. Draw the sticky header using translation values which depend on orientation, direction and
+//                    // position of the next header view.
+//                    val nextHeaderView: View? = if (nextHeaderPos != -1) {
+//                        val nextHeaderView = getChildAt(anchorIndex + (nextHeaderPos - anchorPos))
+//                        // The header view itself is added to the RecyclerView. Discard it if it comes up.
+//                        if (nextHeaderView === header) null else nextHeaderView
+//                    } else null
+//                    header.translationX = getX(header, nextHeaderView)
+//                    header.translationY = getY(header, nextHeaderView)
+//                    return
+//                }
             }
         }
 
@@ -490,25 +491,31 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     /**
      * Finds the header index of `position` in `headerPositions`.
      */
+    @Deprecated("Use Set structure instead.")
     private fun findHeaderIndex(position: Int): Int {
-        val index = headerPositions.binarySearch(position, 0, headerPositions.size)
-        return if (index >= 0) index else -1
+        throw Exception("DEPRECATED")
+//        val index = headerPositions.binarySearch(position, 0, headerPositions.size)
+//        return if (index >= 0) index else -1
     }
 
     /**
      * Finds the header index of `position` or the one before it in `headerPositions`.
      */
+    @Deprecated("Use Set structure instead.")
     private fun findHeaderIndexOrBefore(position: Int): Int {
-        val index = headerPositions.binarySearch(position, 0, headerPositions.size)
-        return if (index >= 0) index else index.inv() - 1
+        throw Exception("DEPRECATED")
+//        val index = headerPositions.binarySearch(position, 0, headerPositions.size)
+//        return if (index >= 0) index else index.inv() - 1
     }
 
     /**
      * Finds the header index of `position` or the one next to it in `headerPositions`.
      */
+    @Deprecated("Use Set structure instead.")
     private fun findHeaderIndexOrNext(position: Int): Int {
-        val index = headerPositions.binarySearch(position, 0, headerPositions.size)
-        return if (index >= 0) index else index.inv()
+        throw Exception("DEPRECATED")
+//        val index = headerPositions.binarySearch(position, 0, headerPositions.size)
+//        return if (index >= 0) index else index.inv()
     }
 
     private fun setScrollState(position: Int, offset: Int) {
@@ -554,23 +561,25 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             // Shift headers below down.
             val headerCount = headerPositions.size
             if (headerCount > 0) {
-                var i = findHeaderIndexOrNext(positionStart)
-                while (i in 0 until headerCount) {
-                    headerPositions[i] = headerPositions[i] + itemCount
-                    i++
-                }
+                // TODO: 2022.08.22 change to Set structure.
+//                var i = findHeaderIndexOrNext(positionStart)
+//                while (i in 0 until headerCount) {
+//                    headerPositions[i] = headerPositions[i] + itemCount
+//                    i++
+//                }
             }
 
             // Add new headers.
             for (i in positionStart until positionStart + itemCount) {
                 val isSticky = adapter?.isStickyHeader(i) ?: false
                 if (isSticky) {
-                    val headerIndex = findHeaderIndexOrNext(i)
-                    if (headerIndex != -1) {
-                        headerPositions.add(headerIndex, i)
-                    } else {
-                        headerPositions.add(i)
-                    }
+                    // TODO: 2022.08.22 change to Set structure.
+//                    val headerIndex = findHeaderIndexOrNext(i)
+//                    if (headerIndex != -1) {
+//                        headerPositions.add(headerIndex, i)
+//                    } else {
+//                        headerPositions.add(i)
+//                    }
                 }
             }
         }
@@ -579,13 +588,14 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             var headerCount = headerPositions.size
             if (headerCount > 0) {
                 // Remove headers.
-                for (i in positionStart + itemCount - 1 downTo positionStart) {
-                    val index = findHeaderIndex(i)
-                    if (index != -1) {
-                        headerPositions.removeAt(index)
-                        headerCount--
-                    }
-                }
+                // TODO: 2022.08.22 change to Set structure.
+//                for (i in positionStart + itemCount - 1 downTo positionStart) {
+//                    val index = findHeaderIndex(i)
+//                    if (index != -1) {
+//                        headerPositions.removeAt(index)
+//                        headerCount--
+//                    }
+//                }
 
                 // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
                 if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
@@ -593,11 +603,12 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
 
                 // Shift headers below up.
-                var i = findHeaderIndexOrNext(positionStart + itemCount)
-                while (i in 0 until headerCount) {
-                    headerPositions[i] = headerPositions[i] - itemCount
-                    i++
-                }
+                // TODO: 2022.08.22 change to Set structure.
+//                var i = findHeaderIndexOrNext(positionStart + itemCount)
+//                while (i in 0 until headerCount) {
+//                    headerPositions[i] = headerPositions[i] - itemCount
+//                    i++
+//                }
             }
         }
 
@@ -606,49 +617,52 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             // Shift headers in-between by -itemCount (reverse if upwards).
             val headerCount = headerPositions.size
             if (headerCount <= 0) return
-            if (fromPosition < toPosition) {
-                var i = findHeaderIndexOrNext(fromPosition)
-                while (i in 0 until headerCount) {
-                    val headerPos = headerPositions[i]
-                    if (headerPos >= fromPosition && headerPos < fromPosition + itemCount) {
-                        headerPositions[i] = headerPos - (toPosition - fromPosition)
-                        sortHeaderAtIndex(i)
-                    } else if (headerPos >= fromPosition + itemCount && headerPos <= toPosition) {
-                        headerPositions[i] = headerPos - itemCount
-                        sortHeaderAtIndex(i)
-                    } else {
-                        break
-                    }
-                    i++
-                }
-            } else {
-                var i = findHeaderIndexOrNext(toPosition)
-                loop@ while (i in 0 until headerCount) {
-                    val headerPos = headerPositions[i]
-                    when {
-                        headerPos >= fromPosition && headerPos < fromPosition + itemCount -> {
-                            headerPositions[i] = headerPos + (toPosition - fromPosition)
-                            sortHeaderAtIndex(i)
-                        }
-                        headerPos in toPosition..fromPosition -> {
-                            headerPositions[i] = headerPos + itemCount
-                            sortHeaderAtIndex(i)
-                        }
-                        else -> break@loop
-                    }
-                    i++
-                }
-            }
+            // TODO: 2022.08.22 change to Set structure.
+//            if (fromPosition < toPosition) {
+//                var i = findHeaderIndexOrNext(fromPosition)
+//                while (i in 0 until headerCount) {
+//                    val headerPos = headerPositions[i]
+//                    if (headerPos >= fromPosition && headerPos < fromPosition + itemCount) {
+//                        headerPositions[i] = headerPos - (toPosition - fromPosition)
+//                        sortHeaderAtIndex(i)
+//                    } else if (headerPos >= fromPosition + itemCount && headerPos <= toPosition) {
+//                        headerPositions[i] = headerPos - itemCount
+//                        sortHeaderAtIndex(i)
+//                    } else {
+//                        break
+//                    }
+//                    i++
+//                }
+//            } else {
+//                var i = findHeaderIndexOrNext(toPosition)
+//                loop@ while (i in 0 until headerCount) {
+//                    val headerPos = headerPositions[i]
+//                    when {
+//                        headerPos >= fromPosition && headerPos < fromPosition + itemCount -> {
+//                            headerPositions[i] = headerPos + (toPosition - fromPosition)
+//                            sortHeaderAtIndex(i)
+//                        }
+//                        headerPos in toPosition..fromPosition -> {
+//                            headerPositions[i] = headerPos + itemCount
+//                            sortHeaderAtIndex(i)
+//                        }
+//                        else -> break@loop
+//                    }
+//                    i++
+//                }
+//            }
         }
 
+        @Deprecated("When use set structure instead, it doesn't need sort.")
         private fun sortHeaderAtIndex(index: Int) {
-            val headerPos = headerPositions.removeAt(index)
-            val headerIndex = findHeaderIndexOrNext(headerPos)
-            if (headerIndex != -1) {
-                headerPositions.add(headerIndex, headerPos)
-            } else {
-                headerPositions.add(headerPos)
-            }
+            throw Exception("DEPRECATED")
+//            val headerPos = headerPositions.removeAt(index)
+//            val headerIndex = findHeaderIndexOrNext(headerPos)
+//            if (headerIndex != -1) {
+//                headerPositions.add(headerIndex, headerPos)
+//            } else {
+//                headerPositions.add(headerPos)
+//            }
         }
     }
 }
