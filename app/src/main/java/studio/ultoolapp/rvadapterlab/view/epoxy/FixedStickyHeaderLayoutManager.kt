@@ -37,6 +37,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     private val headerPositions = mutableListOf<Int>()
     private val headerPositionsObserver = HeaderPositionsAdapterDataObserver()
 
+    // TODO: 2022.08.09 this 2 are added lines.
     private var headerPositionsUpdateStart: Int = HEADER_POSITIONS_UPDATE_FULL
     private var headerPositionsUpdateCount: Int = 0
 
@@ -133,6 +134,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
             return
         }
 
+        // TODO: 2022.08.09 this is added line.
         updateHeaderPositionsIfNeeded()
 
         // There is no header above or the position is a header.
@@ -230,6 +232,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
      * Updates the sticky header state (creation, binding, display), to be called whenever there's a layout or scroll
      */
     private fun updateStickyHeader(recycler: RecyclerView.Recycler, layout: Boolean) {
+        // TODO: 2022.08.09 this is added line.
         updateHeaderPositionsIfNeeded()
 
         val headerCount = headerPositions.size
@@ -484,6 +487,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         }
     }
 
+    // TODO: 2022.08.09 this is added KEY function.
     private fun updateHeaderPositionsIfNeeded() {
         val updateStart = headerPositionsUpdateStart
         if (updateStart == HEADER_POSITIONS_UPDATE_NONE) {
@@ -538,6 +542,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         return if (index >= 0) index else index.inv()
     }
 
+    // TODO: 2022.08.09 [below] these are ADDED functions.
     private fun appendHeaderPosition(element: Int) {
         headerPositions.add(element)
     }
@@ -553,6 +558,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
     private fun removeHeaderPositionAt(index: Int) {
         headerPositions.removeAt(index)
     }
+    // TODO: 2022.08.09 [above] these are ADDED functions.
 
     private fun setScrollState(position: Int, offset: Int) {
         scrollPosition = position
@@ -577,11 +583,13 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
      */
     private inner class HeaderPositionsAdapterDataObserver : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {
+            // TODO: 2022.08.09 MAIN changes
             // There's no hint at what changed, so request a full update.
             headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
         }
 
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            // TODO: 2022.08.09 ADDED checks
             if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
                 // If a partial update was pending, cancel it and request a full update.
                 headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
@@ -598,12 +606,14 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
                 }
             }
 
+            // TODO: 2022.08.09 ADDED changes.
             // Request adding new headers through a partial update.
             headerPositionsUpdateStart = positionStart
             headerPositionsUpdateCount = itemCount
         }
 
         override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            // TODO: 2022.08.09 [below] ADDED changes
             val updateStart = headerPositionsUpdateStart
             if (positionStart == HEADER_POSITIONS_UPDATE_FULL) return
             if (updateStart != HEADER_POSITIONS_UPDATE_NONE) {
@@ -617,6 +627,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
                     return
                 }
             }
+            // TODO: 2022.08.09 [above] ADDED changes
 
             var headerCount = headerPositions.size
             if (headerCount > 0) {
@@ -644,6 +655,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         }
 
         override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            // TODO: 2022.08.09 ADDED checks
             if (headerPositionsUpdateStart != HEADER_POSITIONS_UPDATE_NONE) {
                 // If a partial update was pending, cancel it and request a full update.
                 headerPositionsUpdateStart = HEADER_POSITIONS_UPDATE_FULL
@@ -690,6 +702,7 @@ class EpoxyFixedStickyHeaderLayoutManager @JvmOverloads constructor(
         }
     }
 
+    // TODO: 2022.08.09 ADDED states
     companion object {
         private const val HEADER_POSITIONS_UPDATE_NONE = -1
         private const val HEADER_POSITIONS_UPDATE_FULL = -2
