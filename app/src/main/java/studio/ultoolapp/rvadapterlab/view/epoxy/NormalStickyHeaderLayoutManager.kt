@@ -39,7 +39,8 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
     private var translationY: Float = 0f
 
     // Header positions for the currently displayed list and their observer.
-    private val headerPositions = mutableSetOf<Int>()
+    // TODO: 2022.08.23 refactor: rename to headerIds
+    private val headerPositions = mutableSetOf<Long>() // saved ids
     private val headerPositionsObserver = HeaderPositionsAdapterDataObserver()
 
     // Sticky header's ViewHolder and dirty state.
@@ -546,15 +547,17 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
             val itemCount = adapter?.itemCount ?: 0
             for (i in 0 until itemCount) {
                 val isSticky = adapter?.isStickyHeader(i) ?: false
-                if (isSticky) {
-                    headerPositions.add(i)
-                }
+                // TODO: 2022.08.23 add header-index-to-id transformation, and replacing it with all the Set add.
+//                if (isSticky) {
+//                    headerPositions.add(i)
+//                }
             }
 
             // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
-            if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
-                scrapStickyHeader(null)
-            }
+            // TODO: 2022.08.23 change to header-index-to-id judgement
+//            if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
+//                scrapStickyHeader(null)
+//            }
         }
 
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
@@ -598,9 +601,10 @@ class NormalStickyHeaderLayoutManager @JvmOverloads constructor(
 //                }
 
                 // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
-                if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
-                    scrapStickyHeader(null)
-                }
+                // TODO: 2022.08.23 change to header-index-to-id judgement
+//                if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
+//                    scrapStickyHeader(null)
+//                }
 
                 // Shift headers below up.
                 // TODO: 2022.08.22 change to Set structure.
